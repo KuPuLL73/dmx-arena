@@ -35,7 +35,7 @@ try{
   await page.reload({waitUntil:'networkidle'});await page.waitForFunction(()=>account?.dismissedQuests?.includes('nickname_dmx'));
   await page.locator('#mobileNav [data-go="quests"]').click();assert.equal(await page.locator('.deferred-quests .nickname-quest').count(),1);
   await page.locator('[data-dismiss-nickname="false"]').click();await page.waitForFunction(()=>!document.querySelector('.deferred-quests'));assert.deepEqual(dismissed,[]);
-  if(expected==='en'&&!manual)await page.screenshot({path:'docs/screenshots/quests.png'});
+  if(expected==='en'&&!manual){await page.evaluate(()=>{for(const node of document.querySelectorAll('*'))if(node.scrollTop)node.scrollTop=0;window.scrollTo(0,0);});await page.screenshot({path:'docs/screenshots/quests.png'});}
   await page.evaluate(()=>openClan(5));await page.locator('.clan-profile-score').waitFor();
   assert.ok((await page.locator('.clan-profile-score strong').textContent()).includes('150'));assert.equal(await page.locator('.clan-page .data-time').count(),0);
   if(expected==='en')await page.waitForFunction(()=>document.querySelector('.clan-profile-score').textContent.includes('Total DMX'));

@@ -75,6 +75,8 @@ npm run qa:beta
 
 The suite starts its own local static server and mocks API responses. No live accounts or keys are required. Set `PLAYWRIGHT_CHANNEL=chrome` only if testing with an installed Google Chrome browser.
 
+An optional GitHub Actions example is provided in `docs/ci-checks.example.yml`. It is a template, not an enabled workflow. The separate [PWTRADE marketplace](https://github.com/KuPuLL73/pwtrade-market) has its own portfolio repository.
+
 ## Deployment
 
 This source snapshot references the public bot/channel and current service endpoints for context. These are not deployment credentials. Deploy a separate instance using your own Telegram Serverless project and Cloudflare account. The Cloudflare account ID has been removed from the public configuration.
