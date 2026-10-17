@@ -1,0 +1,69 @@
+{
+  "generatedAt": 1792199192209,
+  "files": [
+    {
+      "path": "domain.mjs",
+      "sha256": "8e3fde5a8049e1c63f8fb2e0cdc7165f9806704df59c8b0628ebedc101ea26a4"
+    },
+    {
+      "path": "game-service.mjs",
+      "sha256": "62e51ac05f279e8d846965c048a1b22e081ef382bdf314fc351e7fdb0f99271f"
+    },
+    {
+      "path": "economy.mjs",
+      "sha256": "8937f44e49a876a871453ecb42646acafffda69aa8d6abe75ddcc14817231798"
+    },
+    {
+      "path": "quest-launch.mjs",
+      "sha256": "9e3a5787dfaebf642bef59bc69d18a96a1c7f94761cd5acc74a76ee0469feafa"
+    },
+    {
+      "path": "tournaments.mjs",
+      "sha256": "19fa8cbe5f61e462806a1adcaf2d096cd930d57fc1eb0db78430135185779793"
+    },
+    {
+      "path": "loadout.mjs",
+      "sha256": "7f36bf107c10f1d4338e26830209b2d37811fcf84a071ea9f32f0e9e442bfd24"
+    },
+    {
+      "path": "equipment.mjs",
+      "sha256": "865e8890b6259a096ff031901ff561de5407d62c0945f38f05b7cbd211efbcef"
+    },
+    {
+      "path": "profile-view.mjs",
+      "sha256": "bf5430f16e2bcdb727259dfa53778a5b0feb7133f046bf8d8e72676749d8b05c"
+    },
+    {
+      "path": "profile-settings.mjs",
+      "sha256": "ac5b56228e4dd78f1f0e8a5584514e0831fe8220c0b63e85fe5b568171f88b6e"
+    },
+    {
+      "path": "missions.mjs",
+      "sha256": "103f24719754dba2f28fccc7d648bb784a9075b34bedeabd8e24d60646a19035"
+    },
+    {
+      "path": "telegram-quest.mjs",
+      "sha256": "84a3ca778bcbdf34f51d40e3aae32151568422d2be30f494931f1ed3123d4fb3"
+    },
+    {
+      "path": "game-avatar.mjs",
+      "sha256": "1b7f32a26db645c84515eba63b747f5126658a251ffbe6598d1fcf4875c3d505"
+    },
+    {
+      "path": "map-progress.mjs",
+      "sha256": "b1fea2ed7924336da90347491477bf6e8fd6b109038f42e5b6200059f4ef032b"
+    },
+    {
+      "path": "battle-ladder.mjs",
+      "sha256": "c8c2736eae16628a2e3ef9db514a03d68c18aab86f006ec5d59ea5053cb8f87e"
+    },
+    {
+      "path": "battle-timing.mjs",
+      "sha256": "c1177bd9af2a5a8271385a7aa22279008b560ebd12ba4b3fea3411eb278047c0"
+    },
+    {
+      "path": "server.mjs",
+      "sha256": "22d5eba39ef42cb728651702559a2e7fdb74d58f97addd9ffcdf34498f8411a4"
+    }
+  ]
+}

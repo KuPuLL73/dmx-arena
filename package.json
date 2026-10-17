@@ -1,0 +1,22 @@
+{
+  "name": "dmx-arena",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node test-domain.cjs && node test-game.mjs && node test-map-progress.mjs && node test-tournaments.mjs && node test-equipment.mjs && node test-community.mjs && node test-battle-ladder.mjs && node test-settings.mjs && node test-missions.mjs && node test-launch.mjs && node test-serverless-login.mjs && node test-welcome.mjs",
+    "qa": "node qa-beta-fixes.mjs",
+    "serverless:status": "tgcloud status",
+    "serverless:deploy": "node serverless-preflight.mjs && tgcloud push",
+    "launch:prepare": "node prepare-launch.mjs",
+    "serverless:preflight": "node serverless-preflight.mjs",
+    "qa:beta": "node qa-beta-fixes.mjs"
+  },
+  "devDependencies": {
+    "@tgcloud/cli": "^0.2.0",
+    "playwright": "1.56.1"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

@@ -1,0 +1,2 @@
+cryptography>=42
+Telethon>=1.36,<2

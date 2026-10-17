@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {equipSlot,equipmentBonus,EQUIPMENT_SLOTS} from './equipment.mjs';
+import {assertItemsAvailable} from './loadout.mjs';
+import {skinReward} from './economy.mjs';
+import {telegramPhoto,viewInventory,publicProfile} from './profile-view.mjs';
+const items=EQUIPMENT_SLOTS.map((slot,i)=>({id:'nft:owned-'+i,name:'Skin '+i,slot,collection:slot,owned:true,source:'notgames',image:'https://example.com/skin.png',authToken:'never expose'}));
+let profile={userId:123,name:'Owner',publicId:'33333333-3333-4333-8333-333333333333',sets:[],active:null};
+for(let i=0;i<items.length;i++){
+ profile=equipSlot(profile,{slot:items[i].slot,itemId:items[i].id,bonus:999,telegramId:456},items);
+ const bonus=equipmentBonus(profile.sets.find(s=>s.id===profile.active),items);assert.equal(bonus.count,i+1);assert.equal(bonus.percent,(i+1)*10);assert.equal(profile.sets.length,1);assert.equal(profile.userId,123);
+}
+const reservedProfile={...profile,sets:[...profile.sets,{id:'saved-other',name:'Other',slots:{primary:'nft:other-primary'}}]};
+const extraItem={...items[0],id:'nft:other-primary'};
+assert.throws(()=>equipSlot(reservedProfile,{slot:'primary',itemId:extraItem.id},[...items,extraItem]),/другом сете/,'home cannot reuse a saved-set item');
+assertItemsAvailable(profile.sets[0],profile.sets);
+assert.throws(()=>assertItemsAvailable({...profile.sets[0],id:'new-set'},profile.sets),/другом сете/,'another set cannot reuse an owned NFT');
+assertItemsAvailable({...profile.sets[0],id:'new-set'},[]);
+assert.equal(reservedProfile.sets[0].slots.primary,items[0].id,'failed replacement preserves the active set');
+assert.equal(skinReward(100,5),150);assert.equal(skinReward(10,1),11);assert.equal(skinReward(25,1),27);assert.equal(skinReward(25,5),37);
+for(const count of [-1,6,1.5,NaN,'5'])assert.throws(()=>skinReward(25,count));assert.throws(()=>skinReward(Number.MAX_SAFE_INTEGER,5));
+for(const input of [{slot:'body',itemId:items[0].id},{slot:'primary',itemId:items[4].id},{slot:'primary',itemId:'foreign'},{slot:'__proto__',itemId:'foreign'},{slot:'primary',itemId:undefined}])assert.throws(()=>equipSlot(profile,input,items));
+assert.throws(()=>equipSlot(profile,{slot:'primary',itemId:items[0].id},items.map(r=>({...r,source:'shared_preview',owned:true}))));
+assert.equal(equipmentBonus(profile.sets[0],items.slice(1)).percent,0,'missing items invalidate the active bonus');
+const duplicate={name:'Duplicate',slots:{primary:items[0].id,backup:items[0].id}};assert.equal(equipmentBonus(duplicate,items).percent,0);
+const oldName=profile.sets[0].name,oldID=profile.active;profile=equipSlot(profile,{slot:'head',itemId:null},items);assert.equal(profile.active,oldID);assert.equal(profile.sets[0].name,oldName);assert.equal(equipmentBonus(profile.sets[0],items).percent,40);
+for(const slot of EQUIPMENT_SLOTS.slice(0,4))profile=equipSlot(profile,{slot,itemId:null},items);assert.equal(profile.active,null);assert.equal(profile.sets.length,0);
+assert.equal(telegramPhoto('javascript:alert(1)'),null);assert.equal(telegramPhoto('http://host/photo.jpg'),null);assert.equal(telegramPhoto('https://user:password@host/photo'),null);assert.equal(telegramPhoto('https://t.me/i/userpic/320/image.jpg'),'https://t.me/i/userpic/320/image.jpg');
+const view=viewInventory(items.concat([{...items[0],owned:false}]));assert.equal(view.length,5);assert.ok(view.every(r=>!('authToken' in r)));
+const pub=publicProfile({...profile,viewInventory:view,userId:123,gameStats:{secret:'hidden'},reservedPlayerId:'private',photoUrl:'https://t.me/photo.jpg'}, {balance:450});
+assert.equal(pub.dmx.balance,450);assert.equal(pub.profileId,profile.publicId);for(const key of ['userId','telegramId','reservedPlayerId','gameStats','authToken'])assert.ok(!(key in pub));
+console.log('Passed: authenticated five-slot mutations, owner/category enforcement, preview/duplicate/missing-item rejection, additive 0–50% server bonus, integer reward rounding, profile photo URL validation and private-field omission.');

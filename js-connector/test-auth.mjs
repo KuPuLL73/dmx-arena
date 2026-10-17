@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import {decodeOperatorSession} from './operator-session.mjs';
+import {GameAuthorization} from './src/game-auth.js';
+const key=crypto.randomBytes(32),iv=crypto.randomBytes(16),header=Buffer.alloc(9);header[0]=0x80;
+const cipher=crypto.createCipheriv('aes-128-cbc',key.subarray(16),iv);
+const encrypted=Buffer.concat([cipher.update(JSON.stringify({string_session:'1test_session'})),cipher.final()]);
+const data=Buffer.concat([header,iv,encrypted]);
+const token=Buffer.concat([data,crypto.createHmac('sha256',key.subarray(0,16)).update(data).digest()]);
+assert.equal(decodeOperatorSession(key.toString('base64url'),token.toString('base64url')),'1test_session');
+const tampered=Buffer.from(token);tampered[26]^=1;
+assert.throws(()=>decodeOperatorSession(key.toString('base64url'),tampered.toString('base64url')),/integrity/);
+assert.throws(()=>decodeOperatorSession(crypto.randomBytes(32).toString('base64url'),token.toString('base64url')),/integrity/);
+assert.throws(()=>decodeOperatorSession('invalid','invalid'),/Invalid/);
+let now=2000000,initializations=0,refreshes=0,rejectRefresh=false,failLogin=false;
+const auth=new GameAuthorization({credentials:{},clock:()=>now,initData:async kind=>{initializations++;return 'signed-proof-'+kind;},fetch:async(url,options)=>{
+ assert.ok(url.startsWith('https://bff.notcoin.tg/api/v1/auth/')||url.startsWith('https://release.pw.game/api/v2/auth/'));
+ const body=JSON.parse(options.body);
+ if(url.endsWith('refresh-token')){refreshes++;assert.equal(body.refresh_token,'private-refresh');if(rejectRefresh)return {ok:false};}
+ else assert.ok(body.webAppData?.startsWith('signed-proof-')||body.web_app_data?.startsWith('signed-proof-'));
+ return {ok:!failLogin,json:async()=>({data:{access_token:'private-access',refresh_token:'private-refresh'}})};
+}});
+assert.deepEqual(await Promise.all([auth.token('notgames'),auth.token('notgames')]),['private-access','private-access']);
+assert.equal(initializations,1);await auth.token('notgames');assert.equal(initializations,1);
+now+=1500001;await auth.token('notgames');assert.equal(initializations,2);
+await auth.token('pixelworld');assert.equal(initializations,3);
+now+=1200001;await auth.token('pixelworld');assert.equal(refreshes,1);assert.equal(initializations,3);
+rejectRefresh=true;now+=1200001;await auth.token('pixelworld');assert.equal(initializations,4);
+failLogin=true;now+=1500001;await assert.rejects(auth.token('notgames'),/authorization failed/);
+failLogin=false;await auth.token('notgames');
+for(const kind of ['__proto__','constructor','other'])await assert.rejects(auth.token(kind),/Unsupported/);
+console.log('Passed: session tampering rejected, fixed game destinations, deduplicated login, expiry/refresh/fallback and retry.');

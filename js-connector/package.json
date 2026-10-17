@@ -1,0 +1,23 @@
+{
+  "name": "dmx-arena-js-connector",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=24"},
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "node generate-application.mjs && node generate-endpoints.mjs",
+    "test": "node test-suite.mjs",
+    "test:login": "node test-login.mjs",
+    "test:cloud": "node test-worker.mjs --cloud",
+    "status": "node cloud-admin.mjs status",
+    "backup": "node cloud-admin.mjs export"
+  },
+  "dependencies": {
+    "qrcode": "1.5.4",
+    "teleproto": "1.230.0"
+  },
+  "devDependencies": {
+    "wrangler": "4.151.0"
+  }
+}

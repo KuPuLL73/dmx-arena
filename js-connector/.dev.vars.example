@@ -1,0 +1,6 @@
+# Local-only values for your own deployment. Never commit .dev.vars.
+OPERATOR_SESSION=""
+TELEGRAM_API_ID=""
+TELEGRAM_API_HASH=""
+PROBE_KEY=""
+DEPLOY_KEY=""

@@ -1,0 +1,57 @@
+{
+  "boxes_level": {
+    "image": "art/maps/boxes_level.jpg",
+    "source": "https://static.pw.game/unity/interfaces/map_icons/boxes_level.jpg",
+    "bytes": 80638
+  },
+  "panelka_level": {
+    "image": "art/maps/panelka_level.jpg",
+    "source": "https://static.pw.game/unity/interfaces/map_icons/panelka_level.jpg",
+    "bytes": 90528
+  },
+  "city_level": {
+    "image": "art/maps/city_level.jpg",
+    "source": "https://static.pw.game/unity/interfaces/map_icons/city_level.jpg",
+    "bytes": 74218
+  },
+  "silent_floor_level": {
+    "image": "art/maps/silent_floor_level.jpg",
+    "source": "https://static.pw.game/unity/interfaces/map_icons/silent_floor_level.jpg",
+    "bytes": 157379
+  },
+  "not_factory_level": {
+    "image": "art/maps/not_factory_level.jpg",
+    "source": "https://static.pw.game/unity/interfaces/map_icons/not_factory_level.jpg",
+    "bytes": 20181
+  },
+  "jungle_level": {
+    "image": "art/maps/jungle_level.jpg",
+    "source": "https://static.pw.game/unity/interfaces/map_icons/jungle_level.jpg",
+    "bytes": 37660
+  },
+  "medieval_level": {
+    "image": "art/maps/medieval_level.jpg",
+    "source": "https://static.pw.game/unity/interfaces/map_icons/medieval_level.jpg",
+    "bytes": 33196
+  },
+  "lost_city_level": {
+    "image": "art/maps/lost_city_level.jpg",
+    "source": "https://static.pw.game/unity/interfaces/map_icons/lost_city_level.jpg",
+    "bytes": 55367
+  },
+  "victory_street_level": {
+    "image": "art/maps/victory_street_level.jpg",
+    "source": "https://static.pw.game/unity/interfaces/map_icons/victory_street_level.jpg",
+    "bytes": 79662
+  },
+  "flying_ship_level": {
+    "image": "art/maps/flying_ship_level.jpg",
+    "source": "https://static.pw.game/unity/interfaces/map_icons/flying_ship_level.jpg",
+    "bytes": 39834
+  },
+  "temple_level": {
+    "image": "art/maps/temple_level.jpg",
+    "source": "https://static.pw.game/unity/interfaces/map_icons/temple_level.jpg",
+    "bytes": 67064
+  }
+}

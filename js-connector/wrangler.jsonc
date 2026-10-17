@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dmx-arena-connector",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-16",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "durable_objects": {"bindings": [{"name": "CONNECTOR", "class_name": "GameConnector"}]},
+  "migrations": [{"tag": "v1", "new_sqlite_classes": ["GameConnector"]}],
+  "observability": {"enabled": false}
+}
