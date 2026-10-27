@@ -49,22 +49,40 @@
 
 ## Тестовый бот (отдельно от основного)
 
-Цель: тестовый бот со своим Mini App, воркером и пустым хранилищем, чтобы разработка не задевала игроков.
+Тестовый бот: **@pwtrade_bot** (бот владельца для тестов, маркетплейс PWTRADE на нём не работает). Serverless у него включён 27.10.2026, файлы Mini App ещё не загружены.
 
-Риск: в `tgcloud/lib/bridge.js` жёстко прописаны адрес боевого воркера и ID основного бота. Тестовый бот из текущего кода будет писать в **боевое** хранилище.
+### Сделано (27.10.2026): разделение окружений
 
-Значения основного окружения, зашитые в код:
-- `tgcloud/lib/bridge.js` — `ORIGIN` воркера, `BOT_ID`, `CHANNEL_ID`;
-- `tgcloud/lib/welcome.js` — `APP_LINK`, `APP_URL`, проверка `/start@DMXARENABOT`;
-- `telegram-quest.mjs`, `js-connector/src/protocol.js` — канал @DMX_Core и его ID;
-- `dist/app.js`, `dist/i18n.js` — ссылки на бота и канал в интерфейсе;
-- `js-connector/wrangler.jsonc` — имя воркера;
-- `js-connector/cloud-admin.mjs`, `serverless-login.mjs` — служебные скрипты.
+Все адреса и ID ботов собраны в `tgcloud/lib/instances.js` — два набора, `production` и `test`.
 
-План:
-1. Вынести эти значения в конфиг окружения (`production` / `test`), не меняя поведение основного бота.
-2. Владелец: создать тестового бота в @BotFather (+ Serverless), тестовый канал с ботом-админом, отдельный воркер (например `dmx-arena-connector-test`) со своими секретами.
-3. Опубликовать тестовый экземпляр и проверить, что он пишет только в своё хранилище.
+- **Сторона Telegram** (`bridge.js`, обработчик `/start`) выбирает набор по боту, в котором запущена: спрашивает у Telegram `getMe` и сверяет username (а для основного ещё и ID). Один и тот же код работает в обоих ботах, переключать ничего не нужно. Неизвестный бот не подключается ни к какому серверу и молчит на `/start`.
+- **Worker** выбирает набор по переменной `DMX_INSTANCE` (нет переменной = основной). В `wrangler.jsonc` добавлено окружение `test`: отдельный Worker `dmx-arena-connector-test` со своим хранилищем. Обычный `wrangler deploy` по-прежнему трогает только основной.
+- **`cloud-admin.mjs`** с флагом `--instance=test` работает с тестовым Worker и файлом `.dev.vars.test`; при начальной загрузке тестовой копии данные живых игроков **не копируются** — она стартует пустой.
+- Значения основного бота не изменились — это проверяет `test-instances.mjs`.
+- Новые команды в `js-connector`: `npm run dev:test`, `npm run deploy:test`, `npm run status:test`.
+
+Тесты: `npm test` и тесты коннектора (Node 24) — все прошли.
+
+### Что ещё не заполнено для тестового бота
+
+- `botId` — неизвестен. Пока `null`, в тестовом боте не работает только проверка подписки (так и задумано: «проверку добавим позже»). ID = цифры до двоеточия в API Token.
+- `workerOrigin` — предположение `https://dmx-arena-connector-test.dmx-arena-js-connector.workers.dev` (тот же аккаунт Cloudflare). Сверить после первого деплоя тестового Worker.
+- Канал — пока тот же @DMX_Core; тестовый бот не админ канала, поэтому подписку в тесте всё равно не проверить. Если появится тестовый канал — поменять `channelId` в `instances.js` **и** `SUBSCRIPTION` в `telegram-quest.mjs`.
+
+### Не тронуто (осознанно)
+
+- Ссылки на @DMXARENABOT и @DMX_Core в интерфейсе (`dist/app.js`, `dist/i18n.js`) — показываются, когда приложение открыто вне Telegram; в тестовом боте ведут на основного. На работу не влияют.
+- `serverless-login.mjs` (тексты про @DMXARENABOT) и `deploy-secrets.mjs` (загружает секреты в **основной** Worker). Секреты тестового Worker задавать вручную: `npx wrangler secret put <ИМЯ> --env test`.
+- `generated/manifest.json` при пересборке на Linux меняет контрольные суммы из-за переводов строк (оригинал собран на Windows) — не коммитить такие изменения.
+
+### Как поднять тестовый экземпляр (когда дойдём)
+
+1. Cloudflare: `npm run deploy:test --prefix js-connector`, затем секреты `--env test` (`OPERATOR_SESSION`, `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`, `PROBE_KEY`, `DEPLOY_KEY`) — лучше отдельная операторская сессия.
+2. Сверить адрес Worker с `workerOrigin` в `instances.js`.
+3. Telegram: войти в tgcloud CLI токеном CLI Access **тестового** бота, опубликовать, записать в базу бота настройку `backend` (адрес тестового Worker + его ключ).
+4. Начальная загрузка пустой тестовой копии: `node cloud-admin.mjs preview --instance=test`.
+
+Важно: в какой бот уйдёт публикация через tgcloud, решает то, каким токеном выполнен вход в CLI. Перед публикацией проверять, что вошли в тестовый.
 
 Заметки:
 - Для теста лучше отдельная операторская сессия (`OPERATOR_SESSION`): одна сессия в двух местах может быть сброшена Telegram.
@@ -74,7 +92,7 @@
 
 ```sh
 npm test                                   # основные тесты: без сети и ключей (27.10 — все прошли)
-npm ci --prefix js-connector && npm test --prefix js-connector
+npm ci --prefix js-connector && npm test --prefix js-connector   # нужен Node 24
 npm ci && npx playwright install chromium && npm run qa:beta   # браузерный прогон на моках
 ```
 

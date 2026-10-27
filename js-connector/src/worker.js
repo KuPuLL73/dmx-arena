@@ -6,6 +6,7 @@ import {PublicGameData} from './public-game.js';
 import {sqliteFiles,withFiles} from './storage.js';
 import {createApplication} from '../generated/application.js';
 import {authorized,bridgeRequest,receiptApi,bootstrapFiles} from './protocol.js';
+import {instanceByName} from '../../tgcloud/lib/instances.js';
 const receipts=new AsyncLocalStorage();
 function json(status,value){return Response.json(value,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});}
 async function body(request,limit){
@@ -29,6 +30,8 @@ export default {
 export class GameConnector{
  constructor(ctx,env){
   this.ctx=ctx;this.env=env;this.queue=Promise.resolve();this.rate=new Map();
+  // Which copy this Worker serves; production unless DMX_INSTANCE says otherwise.
+  this.instance=instanceByName(env.DMX_INSTANCE);
   this.ready=ctx.blockConcurrencyWhile(async()=>{
    const http=(url,options={})=>fetch(url,{...options,signal:options.signal||AbortSignal.timeout(30000)});
    this.auth=new GameAuthorization({fetch:http,credentials:{session:env.OPERATOR_SESSION,apiId:Number(env.TELEGRAM_API_ID),apiHash:env.TELEGRAM_API_HASH},state:await ctx.storage.get('game-auth')||{}});
@@ -53,7 +56,7 @@ export class GameConnector{
    throw Error('Unsupported game operation');
   };
   this.app=withFiles(this.files,()=>createApplication({connector,telegramApi:(method,input)=>{
-   const context=receipts.getStore();return receiptApi(context?.receipt,context?.userId)(method,input);
+   const context=receipts.getStore();return receiptApi(context?.receipt,context?.userId,{instance:this.instance})(method,input);
   }}));this.files.flush();
  }
  serialized(callback){const job=this.queue.then(callback,callback);this.queue=job.catch(()=>{});return job;}

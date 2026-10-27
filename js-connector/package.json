@@ -5,12 +5,15 @@
   "engines": {"node": ">=24"},
   "scripts": {
     "dev": "wrangler dev",
+    "dev:test": "wrangler dev --env test",
     "deploy": "wrangler deploy",
+    "deploy:test": "wrangler deploy --env test",
     "build": "node generate-application.mjs && node generate-endpoints.mjs",
     "test": "node test-suite.mjs",
     "test:login": "node test-login.mjs",
     "test:cloud": "node test-worker.mjs --cloud",
     "status": "node cloud-admin.mjs status",
+    "status:test": "node cloud-admin.mjs status --instance=test",
     "backup": "node cloud-admin.mjs export"
   },
   "dependencies": {

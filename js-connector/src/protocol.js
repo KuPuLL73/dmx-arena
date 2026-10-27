@@ -1,4 +1,5 @@
 import {timingSafeEqual} from 'node:crypto';
+import {INSTANCES} from '../../tgcloud/lib/instances.js';
 export const ACTIONS=new Set(['getProfile','getLeaderboard','getTournaments','getTournament','createTournament','joinTournament','leaveTournament','startTournament','setTournamentRoom','readyTournamentMatch','confirmTournamentResult','cancelTournament','getPublicProfile','getClanMembers','getClanMaps','saveSettings','setQuestDismissed','checkSubscription','syncClanBattles','lookupPlayer','linkPlayer','syncGame','equipSlot','unlinkGame','saveBookmark','removeBookmark','saveSet','equipSet','deleteSet','claimQuest','saveProfile']);
 export const BOOTSTRAP_FILES=new Set(['profiles.json','game-links.json','game-awards.json','game-map-progress.json','missions-state.json','public-player-cache.json','public-clan-cache.json','quest-launch.json','missions-launch.json','daily-map-launch.json','tournament-settings.json','launch-manifest.json']);
 export function authorized(request,key){
@@ -12,11 +13,11 @@ export function bridgeRequest(value){
  if(!user||!Number.isSafeInteger(user.id)||user.id<=0||user.id>=2**52||typeof user.name!=='string'||user.name.length>256)throw Error('Invalid verified identity');
  return {action:value.action,input:value.input,user:{id:user.id,name:user.name,photoUrl:typeof user.photoUrl==='string'&&user.photoUrl.startsWith('https://')?user.photoUrl:null,languageCode:typeof user.languageCode==='string'?user.languageCode.slice(0,32):''},receipt:value.receipt};
 }
-export function receiptApi(receipt,userId,{clock=Date.now}={}){
+export function receiptApi(receipt,userId,{clock=Date.now,instance=INSTANCES.production}={}){
  return async(method,input={})=>{
-  if(!receipt||receipt.userId!==userId||receipt.bot?.id!==8760866719||!Number.isSafeInteger(receipt.checkedAt)||clock()-receipt.checkedAt>30000||receipt.checkedAt-clock()>5000)throw Error('Telegram пока не подтвердил подписку. Попробуй ещё раз.');
+  if(!receipt||receipt.userId!==userId||instance.botId===null||receipt.bot?.id!==instance.botId||!Number.isSafeInteger(receipt.checkedAt)||clock()-receipt.checkedAt>30000||receipt.checkedAt-clock()>5000)throw Error('Telegram пока не подтвердил подписку. Попробуй ещё раз.');
   if(method==='getMe')return receipt.bot;
-  if(method!=='getChatMember'||input.chat_id!==-1003360145165)throw Error('Subscription receipt mismatch');
+  if(method!=='getChatMember'||input.chat_id!==instance.channelId)throw Error('Subscription receipt mismatch');
   if(input.user_id===receipt.bot.id)return receipt.botMember;
   if(input.user_id===userId&&receipt.member?.user?.id===userId)return receipt.member;
   throw Error('Subscription identity mismatch');

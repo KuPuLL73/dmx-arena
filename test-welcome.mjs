@@ -82,4 +82,12 @@ for(const language of ['ru','en']){
  assert.equal(configured.chat_id,42);assert.equal(configured.menu_button.text,button.text);
 }
 assert.equal((await arenaButton({getChatMenuButton:async()=>{throw Error('unavailable');},setChatMenuButton:async()=>{throw Error('unavailable');}},42,'en')).web_app.url,APP_URL);
-console.log('Welcome text, repeat entry, private /start and delivery failure checks passed');
+// The test bot answers its own mention only, and its button opens its own app.
+const testDeps={...deps,username:'pwtrade_bot'};
+duplicate=false;
+for(const text of ['/start@pwtrade_bot','/start@PWTRADE_BOT ref'])assert.equal((await handleStart({...base,message_id:10,text},testDeps)).handled,true);
+for(const text of ['/start@DMXARENABOT','/start@pwtrade_botx'])assert.equal((await handleStart({...base,message_id:11,text},testDeps)).handled,false);
+assert.equal((await handleStart({...base,message_id:12,text:'/start@pwtrade_bot'},deps)).handled,false,'the live bot ignores the test mention');
+const testUrl='https://app555000111.tgcloud.ai/';
+assert.equal((await arenaButton({getChatMenuButton:async()=>({type:'default'}),setChatMenuButton:async()=>{}},42,'en',testUrl)).web_app.url,testUrl);
+console.log('Welcome text, repeat entry, private /start, per-bot mention and delivery failure checks passed');

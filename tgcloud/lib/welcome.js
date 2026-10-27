@@ -4,8 +4,8 @@ export const WELCOME_TEXT_RU='Добро пожаловать в DMX Arena!\n\n�
 export const RETURN_TEXT_RU='Нажми «Открыть арену», чтобы открыть DMX Arena.';
 export const APP_LINK='https://t.me/DMXARENABOT';
 export const APP_URL='https://app8760866719.tgcloud.ai/';
-export async function arenaButton(api,chatId,language){
- const text=language==='ru'?'Открыть арену':'Open arena';let url=APP_URL;
+export async function arenaButton(api,chatId,language,appUrl=APP_URL){
+ const text=language==='ru'?'Открыть арену':'Open arena';let url=appUrl;
  try{const menu=await api.getChatMenuButton();if(menu?.type==='web_app'&&/^https:\/\//i.test(menu.web_app?.url||''))url=menu.web_app.url;}catch{}
  try{await api.setChatMenuButton({chat_id:chatId,menu_button:{type:'web_app',text,web_app:{url}}});}catch{}
  return {text,web_app:{url}};
@@ -34,11 +34,12 @@ export function welcomeStore(db){
  };
 }
 
-export async function handleStart(message,{claim,complete,release,send,button,now=Date.now}){
+const escapeRegExp=value=>value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+export async function handleStart(message,{claim,complete,release,send,button,now=Date.now,username='DMXARENABOT'}){
  if(message?.chat?.type!=='private'||message.from?.is_bot
   ||!Number.isSafeInteger(message.from?.id)||message.from.id<=0
   ||message.chat.id!==message.from.id||!Number.isSafeInteger(message.message_id)||message.message_id<=0
-  ||typeof message.text!=='string'||!/^\/start(?:@DMXARENABOT)?(?:\s|$)/i.test(message.text))return {handled:false};
+  ||typeof message.text!=='string'||!new RegExp('^/start(?:@'+escapeRegExp(username)+')?(?:\\s|$)','i').test(message.text))return {handled:false};
  const attempt=now(),key={uid:message.from.id,message:message.message_id,attempt};
  const row=await claim({...key,now:attempt,expired:attempt-60000});
  if(!row)return {handled:true,duplicate:true};
